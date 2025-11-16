@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Mail, Lock } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 
@@ -101,12 +101,12 @@ const Login: React.FC = () => {
           <div className="mt-6 text-center">
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               계정이 없으신가요?{' '}
-              <a
-                href="#"
+              <Link
+                to="/signup"
                 className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
               >
                 회원가입
-              </a>
+              </Link>
             </p>
           </div>
 
