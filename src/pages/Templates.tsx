@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Star, Download, Search, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import { templates } from '../data/templates';
+import TemplateCard from '../components/TemplateCard';
 import type { TemplateCategory } from '../types';
 
 const categories: { value: TemplateCategory | 'all'; label: string }[] = [
@@ -11,6 +12,9 @@ const categories: { value: TemplateCategory | 'all'; label: string }[] = [
   { value: 'saas', label: 'SaaS' },
   { value: 'blog', label: '블로그' },
   { value: 'landing', label: '랜딩페이지' },
+  { value: 'dashboard', label: '대시보드' },
+  { value: 'mobile', label: '모바일' },
+  { value: 'education', label: '교육' },
   { value: 'corporate', label: '기업' },
   { value: 'admin', label: '관리자' },
   { value: 'creative', label: '크리에이티브' },
@@ -195,44 +199,7 @@ const Templates: React.FC = () => {
         {/* Template Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {filteredTemplates.map((template) => (
-            <Link
-              key={template.id}
-              to={`/templates/${template.id}`}
-              className="card hover:shadow-xl transition-shadow group"
-            >
-              <div className="relative overflow-hidden rounded-lg mb-4">
-                <img
-                  src={template.image}
-                  alt={template.name}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-2 right-2 px-3 py-1 bg-white dark:bg-gray-800 rounded-full text-sm font-semibold shadow-lg">
-                  ₩{template.price.toLocaleString()}
-                </div>
-                <div className="absolute top-2 left-2 px-2 py-1 bg-primary-600 text-white text-xs rounded">
-                  {categories.find((c) => c.value === template.category)?.label}
-                </div>
-              </div>
-              <h3 className="font-semibold text-lg mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                {template.name}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                {template.description}
-              </p>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-1">
-                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                  <span className="font-medium">{template.rating}</span>
-                  <span className="text-gray-500 dark:text-gray-400">
-                    ({template.reviewCount})
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
-                  <Download className="h-4 w-4" />
-                  <span>{template.downloads}</span>
-                </div>
-              </div>
-            </Link>
+            <TemplateCard key={template.id} template={template} />
           ))}
         </div>
 

@@ -9,6 +9,7 @@ import {
   CheckCircle,
   User,
   ThumbsUp,
+  Heart,
 } from 'lucide-react';
 import { templates } from '../data/templates';
 import { getReviewsByTemplateId } from '../data/reviews';
@@ -17,11 +18,12 @@ import { useApp } from '../contexts/AppContext';
 const TemplateDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToCart } = useApp();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useApp();
   const [activeTab, setActiveTab] = useState<'features' | 'reviews'>('features');
 
   const template = templates.find((t) => t.id === id);
   const reviews = template ? getReviewsByTemplateId(template.id) : [];
+  const isWishlisted = template ? isInWishlist(template.id) : false;
 
   if (!template) {
     return (
@@ -44,6 +46,15 @@ const TemplateDetail: React.FC = () => {
   const handleAddToCart = () => {
     addToCart(template);
     navigate('/cart');
+  };
+
+  const handleWishlistToggle = () => {
+    if (!template) return;
+    if (isWishlisted) {
+      removeFromWishlist(template.id);
+    } else {
+      addToWishlist(template.id);
+    }
   };
 
   return (
@@ -236,6 +247,17 @@ const TemplateDetail: React.FC = () => {
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   장바구니에 추가
+                </button>
+                <button
+                  onClick={handleWishlistToggle}
+                  className={`w-full flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all ${
+                    isWishlisted
+                      ? 'bg-red-500 text-white hover:bg-red-600'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400'
+                  }`}
+                >
+                  <Heart className={`mr-2 h-5 w-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                  {isWishlisted ? '찜하기 취소' : '찜하기'}
                 </button>
                 <a
                   href={template.demoUrl}

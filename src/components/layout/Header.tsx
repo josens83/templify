@@ -12,14 +12,20 @@ import {
   Package,
   Users,
   MessageSquare,
+  Heart,
+  Settings,
+  Upload,
+  BarChart3,
+  Mail,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 
 const Header: React.FC = () => {
-  const { cart, user, isAuthenticated, logout, darkMode, toggleDarkMode } = useApp();
+  const { cart, wishlist, user, isAuthenticated, logout, darkMode, toggleDarkMode } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const wishlistCount = wishlist.length;
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
@@ -89,6 +95,20 @@ const Header: React.FC = () => {
               <Search className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </Link>
 
+            {/* Wishlist */}
+            <Link
+              to="/wishlist"
+              className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="찜하기"
+            >
+              <Heart className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
             {/* Cart */}
             <Link
               to="/cart"
@@ -116,25 +136,78 @@ const Header: React.FC = () => {
                     {user?.name}
                   </span>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <Link
-                    to="/dashboard"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    대시보드
-                  </Link>
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    프로필
-                  </Link>
-                  <button
-                    onClick={logout}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    로그아웃
-                  </button>
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                  <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {user?.email}
+                    </p>
+                  </div>
+
+                  <div className="py-1">
+                    <Link
+                      to="/dashboard"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <User className="h-4 w-4" />
+                      구매자 대시보드
+                    </Link>
+                    <Link
+                      to="/seller-dashboard"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      판매자 대시보드
+                    </Link>
+                  </div>
+
+                  <div className="py-1 border-t border-gray-200 dark:border-gray-700">
+                    <Link
+                      to="/wishlist"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Heart className="h-4 w-4" />
+                      찜한 템플릿
+                      {wishlistCount > 0 && (
+                        <span className="ml-auto px-2 py-0.5 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-full">
+                          {wishlistCount}
+                        </span>
+                      )}
+                    </Link>
+                    <Link
+                      to="/upload-template"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Upload className="h-4 w-4" />
+                      템플릿 업로드
+                    </Link>
+                    <Link
+                      to="/messages"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Mail className="h-4 w-4" />
+                      메시지
+                    </Link>
+                  </div>
+
+                  <div className="py-1 border-t border-gray-200 dark:border-gray-700">
+                    <Link
+                      to="/settings"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Settings className="h-4 w-4" />
+                      설정
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <X className="h-4 w-4" />
+                      로그아웃
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
