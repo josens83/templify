@@ -19,10 +19,12 @@ import {
   Mail,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
+import SearchModal from '../SearchModal';
 
 const Header: React.FC = () => {
   const { cart, wishlist, user, isAuthenticated, logout, darkMode, toggleDarkMode } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
   const wishlistCount = wishlist.length;
@@ -87,13 +89,13 @@ const Header: React.FC = () => {
             </button>
 
             {/* Search */}
-            <Link
-              to="/templates"
+            <button
+              onClick={() => setSearchModalOpen(true)}
               className="hidden sm:flex p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               aria-label="검색"
             >
               <Search className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </Link>
+            </button>
 
             {/* Wishlist */}
             <Link
@@ -273,6 +275,9 @@ const Header: React.FC = () => {
           </nav>
         )}
       </div>
+
+      {/* Search Modal */}
+      <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
     </header>
   );
 };

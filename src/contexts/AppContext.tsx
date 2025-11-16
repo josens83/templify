@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { CartItem, User, Template } from '../types';
+import type { Toast } from '../components/ToastContainer';
 
 interface AppContextType {
   // Cart
@@ -32,6 +33,11 @@ interface AppContextType {
   // Search & Filters
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+
+  // Toast
+  toasts: Toast[];
+  showToast: (type: Toast['type'], message: string) => void;
+  removeToast: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -55,6 +61,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -176,6 +183,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setDarkMode((prev) => !prev);
   };
 
+  const showToast = (type: Toast['type'], message: string) => {
+    const id = `toast-${Date.now()}-${Math.random()}`;
+    const newToast: Toast = { id, type, message };
+    setToasts((prev) => [...prev, newToast]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
+
   const value: AppContextType = {
     cart,
     addToCart,
@@ -196,6 +213,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     toggleDarkMode,
     searchQuery,
     setSearchQuery,
+    toasts,
+    showToast,
+    removeToast,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

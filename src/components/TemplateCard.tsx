@@ -9,7 +9,7 @@ interface TemplateCardProps {
 }
 
 const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
-  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useApp();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, showToast } = useApp();
   const isWishlisted = isInWishlist(template.id);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -17,8 +17,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
     e.stopPropagation();
     if (isWishlisted) {
       removeFromWishlist(template.id);
+      showToast('info', '찜하기에서 제거되었습니다.');
     } else {
       addToWishlist(template.id);
+      showToast('success', '찜하기에 추가되었습니다!');
     }
   };
 
@@ -26,6 +28,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(template);
+    showToast('success', '장바구니에 추가되었습니다!');
   };
 
   return (

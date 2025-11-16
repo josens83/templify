@@ -5,7 +5,7 @@ import { useApp } from '../contexts/AppContext';
 import { templates } from '../data/templates';
 
 const Wishlist: React.FC = () => {
-  const { wishlist, removeFromWishlist, addToCart } = useApp();
+  const { wishlist, removeFromWishlist, addToCart, showToast } = useApp();
 
   const wishlistTemplates = templates.filter((template) =>
     wishlist.includes(template.id)
@@ -13,6 +13,7 @@ const Wishlist: React.FC = () => {
 
   const handleAddToCart = (template: typeof templates[0]) => {
     addToCart(template);
+    showToast('success', '장바구니에 추가되었습니다!');
   };
 
   if (wishlistTemplates.length === 0) {
@@ -128,7 +129,10 @@ const Wishlist: React.FC = () => {
                         장바구니
                       </button>
                       <button
-                        onClick={() => removeFromWishlist(template.id)}
+                        onClick={() => {
+                          removeFromWishlist(template.id);
+                          showToast('info', '찜하기에서 제거되었습니다.');
+                        }}
                         className="flex items-center gap-2 px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -157,6 +161,7 @@ const Wishlist: React.FC = () => {
             <button
               onClick={() => {
                 wishlistTemplates.forEach((template) => addToCart(template));
+                showToast('success', `${wishlistTemplates.length}개의 템플릿이 장바구니에 추가되었습니다!`);
               }}
               className="btn-primary flex items-center gap-2"
             >

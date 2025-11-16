@@ -18,7 +18,7 @@ import { useApp } from '../contexts/AppContext';
 const TemplateDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, addToRecentlyViewed } = useApp();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, addToRecentlyViewed, showToast } = useApp();
   const [activeTab, setActiveTab] = useState<'features' | 'reviews'>('features');
 
   const template = templates.find((t) => t.id === id);
@@ -52,6 +52,7 @@ const TemplateDetail: React.FC = () => {
 
   const handleAddToCart = () => {
     addToCart(template);
+    showToast('success', '장바구니에 추가되었습니다!');
     navigate('/cart');
   };
 
@@ -59,8 +60,10 @@ const TemplateDetail: React.FC = () => {
     if (!template) return;
     if (isWishlisted) {
       removeFromWishlist(template.id);
+      showToast('info', '찜하기에서 제거되었습니다.');
     } else {
       addToWishlist(template.id);
+      showToast('success', '찜하기에 추가되었습니다!');
     }
   };
 
