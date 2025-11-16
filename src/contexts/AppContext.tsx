@@ -9,6 +9,12 @@ interface AppContextType {
   clearCart: () => void;
   cartTotal: number;
 
+  // Wishlist
+  wishlist: string[];
+  addToWishlist: (templateId: string) => void;
+  removeFromWishlist: (templateId: string) => void;
+  isInWishlist: (templateId: string) => boolean;
+
   // User
   user: User | null;
   login: (email: string, password: string) => void;
@@ -40,6 +46,7 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,10 +54,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Load from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
+    const savedWishlist = localStorage.getItem('wishlist');
     const savedUser = localStorage.getItem('user');
     const savedDarkMode = localStorage.getItem('darkMode');
 
     if (savedCart) setCart(JSON.parse(savedCart));
+    if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
     if (savedUser) setUser(JSON.parse(savedUser));
     if (savedDarkMode) setDarkMode(savedDarkMode === 'true');
   }, []);
@@ -59,6 +68,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
+
+  // Save wishlist to localStorage
+  useEffect(() => {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
 
   // Apply dark mode
   useEffect(() => {
@@ -97,6 +111,23 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     0
   );
 
+  const addToWishlist = (templateId: string) => {
+    setWishlist((prev) => {
+      if (prev.includes(templateId)) {
+        return prev;
+      }
+      return [...prev, templateId];
+    });
+  };
+
+  const removeFromWishlist = (templateId: string) => {
+    setWishlist((prev) => prev.filter((id) => id !== templateId));
+  };
+
+  const isInWishlist = (templateId: string) => {
+    return wishlist.includes(templateId);
+  };
+
   const login = (email: string, _password: string) => {
     // Mock login - in real app, this would call an API
     const mockUser: User = {
@@ -130,6 +161,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     removeFromCart,
     clearCart,
     cartTotal,
+    wishlist,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
     user,
     login,
     logout,

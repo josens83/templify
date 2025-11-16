@@ -24,7 +24,10 @@ export type TemplateCategory =
   | 'landing'
   | 'corporate'
   | 'admin'
-  | 'creative';
+  | 'creative'
+  | 'dashboard'
+  | 'mobile'
+  | 'education';
 
 // Expert types
 export interface Expert {
