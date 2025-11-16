@@ -15,6 +15,10 @@ interface AppContextType {
   removeFromWishlist: (templateId: string) => void;
   isInWishlist: (templateId: string) => boolean;
 
+  // Recently Viewed
+  recentlyViewed: string[];
+  addToRecentlyViewed: (templateId: string) => void;
+
   // User
   user: User | null;
   login: (email: string, password: string) => void;
@@ -47,6 +51,7 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,11 +60,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     const savedWishlist = localStorage.getItem('wishlist');
+    const savedRecentlyViewed = localStorage.getItem('recentlyViewed');
     const savedUser = localStorage.getItem('user');
     const savedDarkMode = localStorage.getItem('darkMode');
 
     if (savedCart) setCart(JSON.parse(savedCart));
     if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
+    if (savedRecentlyViewed) setRecentlyViewed(JSON.parse(savedRecentlyViewed));
     if (savedUser) setUser(JSON.parse(savedUser));
     if (savedDarkMode) setDarkMode(savedDarkMode === 'true');
   }, []);
@@ -73,6 +80,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
+
+  // Save recently viewed to localStorage
+  useEffect(() => {
+    localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+  }, [recentlyViewed]);
 
   // Apply dark mode
   useEffect(() => {
@@ -128,6 +140,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     return wishlist.includes(templateId);
   };
 
+  const addToRecentlyViewed = (templateId: string) => {
+    setRecentlyViewed((prev) => {
+      // Remove if already exists
+      const filtered = prev.filter((id) => id !== templateId);
+      // Add to beginning, keep max 10
+      return [templateId, ...filtered].slice(0, 10);
+    });
+  };
+
   const login = (email: string, _password: string) => {
     // Mock login - in real app, this would call an API
     const mockUser: User = {
@@ -165,6 +186,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
+    recentlyViewed,
+    addToRecentlyViewed,
     user,
     login,
     logout,

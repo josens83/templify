@@ -3,19 +3,28 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Star,
-  Download,
   Users,
   Shield,
   Zap,
   Package,
   TrendingUp,
+  Clock,
 } from 'lucide-react';
 import { templates } from '../data/templates';
 import { experts } from '../data/experts';
+import TemplateCard from '../components/TemplateCard';
+import { useApp } from '../contexts/AppContext';
 
 const Home: React.FC = () => {
+  const { recentlyViewed } = useApp();
   const featuredTemplates = templates.slice(0, 6);
   const topExperts = experts.slice(0, 4);
+
+  // Get recently viewed templates in order
+  const recentlyViewedTemplates = recentlyViewed
+    .map((id) => templates.find((t) => t.id === id))
+    .filter((t) => t !== undefined)
+    .slice(0, 4);
 
   return (
     <div>
@@ -113,6 +122,34 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Recently Viewed */}
+      {recentlyViewedTemplates.length > 0 && (
+        <section className="py-20 bg-white dark:bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-12">
+              <div className="flex items-center gap-3">
+                <Clock className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                  최근 본 템플릿
+                </h2>
+              </div>
+              <Link
+                to="/templates"
+                className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+              >
+                더 보기
+                <ArrowRight className="ml-1 h-5 w-5" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {recentlyViewedTemplates.map((template) => (
+                <TemplateCard key={template.id} template={template} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Featured Templates */}
       <section className="py-20 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4">
@@ -130,41 +167,7 @@ const Home: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredTemplates.map((template) => (
-              <Link
-                key={template.id}
-                to={`/templates/${template.id}`}
-                className="card hover:shadow-xl transition-shadow group"
-              >
-                <div className="relative overflow-hidden rounded-lg mb-4">
-                  <img
-                    src={template.image}
-                    alt={template.name}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-2 right-2 px-2 py-1 bg-white dark:bg-gray-800 rounded text-sm font-semibold">
-                    ₩{template.price.toLocaleString()}
-                  </div>
-                </div>
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  {template.name}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                  {template.description}
-                </p>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                    <span className="font-medium">{template.rating}</span>
-                    <span className="text-gray-500 dark:text-gray-400">
-                      ({template.reviewCount})
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
-                    <Download className="h-4 w-4" />
-                    <span>{template.downloads}</span>
-                  </div>
-                </div>
-              </Link>
+              <TemplateCard key={template.id} template={template} />
             ))}
           </div>
         </div>

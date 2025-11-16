@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Star,
@@ -18,12 +18,19 @@ import { useApp } from '../contexts/AppContext';
 const TemplateDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useApp();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, addToRecentlyViewed } = useApp();
   const [activeTab, setActiveTab] = useState<'features' | 'reviews'>('features');
 
   const template = templates.find((t) => t.id === id);
   const reviews = template ? getReviewsByTemplateId(template.id) : [];
   const isWishlisted = template ? isInWishlist(template.id) : false;
+
+  // Add to recently viewed when template is loaded
+  useEffect(() => {
+    if (template) {
+      addToRecentlyViewed(template.id);
+    }
+  }, [template, addToRecentlyViewed]);
 
   if (!template) {
     return (
