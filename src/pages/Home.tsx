@@ -9,6 +9,8 @@ import {
   Package,
   TrendingUp,
   Clock,
+  Flame,
+  Sparkles,
 } from 'lucide-react';
 import { templates } from '../data/templates';
 import { experts } from '../data/experts';
@@ -19,6 +21,23 @@ const Home: React.FC = () => {
   const { recentlyViewed } = useApp();
   const featuredTemplates = templates.slice(0, 6);
   const topExperts = experts.slice(0, 4);
+
+  // Get trending templates (based on recent views/downloads)
+  const trendingTemplates = [...templates]
+    .sort((a, b) => b.downloads - a.downloads)
+    .slice(0, 4);
+
+  // Get bestseller templates (based on rating and downloads)
+  const bestsellerTemplates = [...templates]
+    .sort((a, b) => {
+      const scoreA = (a.rating * 20) + (a.downloads / 100);
+      const scoreB = (b.rating * 20) + (b.downloads / 100);
+      return scoreB - scoreA;
+    })
+    .slice(0, 4);
+
+  // Get new templates (simulate by reversing order)
+  const newTemplates = [...templates].reverse().slice(0, 4);
 
   // Get recently viewed templates in order
   const recentlyViewedTemplates = recentlyViewed
@@ -122,9 +141,112 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Trending Templates */}
+      <section className="py-20 bg-white dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-3">
+              <Flame className="h-8 w-8 text-orange-500" />
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                  지금 뜨는 템플릿 🔥
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  가장 많은 다운로드를 받고 있는 인기 템플릿
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/templates"
+              className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+            >
+              더 보기
+              <ArrowRight className="ml-1 h-5 w-5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {trendingTemplates.map((template, index) => (
+              <div key={template.id} className="relative">
+                <div className="absolute -top-2 -left-2 z-10 w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                  {index + 1}
+                </div>
+                <TemplateCard template={template} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Bestseller Templates */}
+      <section className="py-20 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-3">
+              <Star className="h-8 w-8 text-yellow-500 fill-yellow-500" />
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                  이번 주 베스트셀러 ⭐
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  높은 평점과 판매량을 자랑하는 최고의 템플릿
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/templates"
+              className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+            >
+              더 보기
+              <ArrowRight className="ml-1 h-5 w-5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {bestsellerTemplates.map((template) => (
+              <TemplateCard key={template.id} template={template} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* New Templates */}
+      <section className="py-20 bg-white dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-8 w-8 text-purple-500" />
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                  방금 등록된 신규 템플릿 ✨
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  따끈따끈한 신규 템플릿을 가장 먼저 만나보세요
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/templates"
+              className="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+            >
+              더 보기
+              <ArrowRight className="ml-1 h-5 w-5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {newTemplates.map((template) => (
+              <div key={template.id} className="relative">
+                <div className="absolute top-4 right-4 z-10 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg">
+                  NEW
+                </div>
+                <TemplateCard template={template} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Recently Viewed */}
       {recentlyViewedTemplates.length > 0 && (
-        <section className="py-20 bg-white dark:bg-gray-900">
+        <section className="py-20 bg-gray-50 dark:bg-gray-800">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-12">
               <div className="flex items-center gap-3">

@@ -11,6 +11,8 @@ import {
   ThumbsUp,
   Heart,
   Edit,
+  FileText,
+  XCircle,
 } from 'lucide-react';
 import { templates } from '../data/templates';
 import { getReviewsByTemplateId } from '../data/reviews';
@@ -22,7 +24,7 @@ const TemplateDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, addToRecentlyViewed, showToast, isAuthenticated } = useApp();
-  const [activeTab, setActiveTab] = useState<'features' | 'reviews'>('features');
+  const [activeTab, setActiveTab] = useState<'features' | 'license' | 'reviews'>('features');
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
 
@@ -210,6 +212,16 @@ const TemplateDetail: React.FC = () => {
                     주요 기능
                   </button>
                   <button
+                    onClick={() => setActiveTab('license')}
+                    className={`pb-4 font-medium border-b-2 transition-colors ${
+                      activeTab === 'license'
+                        ? 'border-primary-600 text-primary-600 dark:text-primary-400'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                    }`}
+                  >
+                    라이선스 정보
+                  </button>
+                  <button
                     onClick={() => setActiveTab('reviews')}
                     className={`pb-4 font-medium border-b-2 transition-colors ${
                       activeTab === 'reviews'
@@ -236,6 +248,157 @@ const TemplateDetail: React.FC = () => {
                       </li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {activeTab === 'license' && (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                    <div className="flex items-start gap-3">
+                      <FileText className="h-6 w-6 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                          상업용 라이선스 (Commercial License)
+                        </h2>
+                        <p className="text-gray-700 dark:text-gray-300">
+                          이 템플릿을 구매하시면 개인 및 상업적 프로젝트에 자유롭게 사용하실 수 있습니다.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 허용 사항 */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      허용 사항
+                    </h3>
+                    <ul className="space-y-3 ml-7">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">상업적 이용</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            클라이언트 프로젝트, 스타트업, 기업 사이트 등 상업적 목적으로 사용 가능합니다.
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">무제한 프로젝트</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            구매 후 여러 프로젝트에 횟수 제한 없이 사용할 수 있습니다.
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">수정 및 커스터마이징</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            템플릿의 모든 요소를 프로젝트에 맞게 자유롭게 수정할 수 있습니다.
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">최종 제품에 포함</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            SaaS, 웹 애플리케이션 등 최종 제품의 일부로 통합 가능합니다.
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">평생 업데이트</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            향후 제공되는 모든 업데이트를 무료로 받을 수 있습니다.
+                          </p>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* 제한 사항 */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                      <XCircle className="h-5 w-5 text-red-500" />
+                      제한 사항
+                    </h3>
+                    <ul className="space-y-3 ml-7">
+                      <li className="flex items-start space-x-3">
+                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">재판매 금지</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            템플릿 자체를 그대로 또는 수정하여 재판매할 수 없습니다.
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">재배포 금지</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            템플릿 파일을 무료 또는 유료로 배포할 수 없습니다.
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">템플릿 마켓플레이스 등록 금지</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            다른 템플릿 마켓플레이스나 테마 스토어에 업로드할 수 없습니다.
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">라이선스 이전 불가</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            구매한 라이선스를 제3자에게 양도하거나 공유할 수 없습니다.
+                          </p>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* 추가 정보 */}
+                  <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                      추가 정보
+                    </h3>
+                    <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                      <p>
+                        <span className="font-medium text-gray-900 dark:text-white">저작권:</span>{' '}
+                        모든 저작권은 템플릿 제작자에게 있으며, 구매자는 사용권을 획득합니다.
+                      </p>
+                      <p>
+                        <span className="font-medium text-gray-900 dark:text-white">출처 표시:</span>{' '}
+                        출처 표시는 선택사항이지만, 제작자를 언급해주시면 감사하겠습니다.
+                      </p>
+                      <p>
+                        <span className="font-medium text-gray-900 dark:text-white">환불 정책:</span>{' '}
+                        구매 후 30일 이내 정당한 사유가 있는 경우 환불이 가능합니다.
+                      </p>
+                      <p>
+                        <span className="font-medium text-gray-900 dark:text-white">기술 지원:</span>{' '}
+                        구매 후 6개월간 이메일을 통한 기술 지원이 제공됩니다.
+                      </p>
+                      <p className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        라이선스에 대해 궁금한 점이 있으시면{' '}
+                        <Link to="/support" className="text-primary-600 dark:text-primary-400 hover:underline">
+                          고객지원
+                        </Link>
+                        으로 문의해주세요.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
