@@ -157,15 +157,15 @@ const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/help"
+                  to="/faq"
                   className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors"
                 >
-                  도움말
+                  FAQ
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/contact"
+                  to="/community"
                   className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors"
                 >
                   문의하기

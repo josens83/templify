@@ -10,16 +10,20 @@ import {
   User,
   ThumbsUp,
   Heart,
+  Edit,
 } from 'lucide-react';
 import { templates } from '../data/templates';
 import { getReviewsByTemplateId } from '../data/reviews';
 import { useApp } from '../contexts/AppContext';
+import ReviewModal from '../components/ReviewModal';
 
 const TemplateDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, addToRecentlyViewed, showToast } = useApp();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, addToRecentlyViewed, showToast, isAuthenticated } = useApp();
   const [activeTab, setActiveTab] = useState<'features' | 'reviews'>('features');
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false);
 
   const template = templates.find((t) => t.id === id);
   const reviews = template ? getReviewsByTemplateId(template.id) : [];
@@ -31,6 +35,17 @@ const TemplateDetail: React.FC = () => {
       addToRecentlyViewed(template.id);
     }
   }, [template, addToRecentlyViewed]);
+
+  // Check if user has purchased this template
+  useEffect(() => {
+    if (!template) return;
+
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const purchased = orders.some((order: any) =>
+      order.items.some((item: any) => item.template.id === template.id)
+    );
+    setHasPurchased(purchased);
+  }, [template]);
 
   if (!template) {
     return (
@@ -65,6 +80,29 @@ const TemplateDetail: React.FC = () => {
       addToWishlist(template.id);
       showToast('success', '찜하기에 추가되었습니다!');
     }
+  };
+
+  const handleReviewSubmit = (review: any) => {
+    // In a real application, this would be sent to the backend
+    // For now, we'll just show a success message
+    showToast('success', '리뷰가 등록되었습니다. 감사합니다!');
+    console.log('Review submitted:', review);
+    // Ideally, refresh reviews list here
+  };
+
+  const handleWriteReview = () => {
+    if (!isAuthenticated) {
+      showToast('error', '로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (!hasPurchased) {
+      showToast('error', '구매한 템플릿만 리뷰를 작성할 수 있습니다.');
+      return;
+    }
+
+    setReviewModalOpen(true);
   };
 
   return (
@@ -193,6 +231,19 @@ const TemplateDetail: React.FC = () => {
 
               {activeTab === 'reviews' && (
                 <div className="space-y-6">
+                  {/* Write Review Button */}
+                  {hasPurchased && (
+                    <div className="flex justify-end mb-6">
+                      <button
+                        onClick={handleWriteReview}
+                        className="btn-primary flex items-center gap-2"
+                      >
+                        <Edit className="h-5 w-5" />
+                        리뷰 작성
+                      </button>
+                    </div>
+                  )}
+
                   {reviews.map((review) => (
                     <div
                       key={review.id}
@@ -365,6 +416,17 @@ const TemplateDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {template && (
+        <ReviewModal
+          isOpen={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          templateName={template.name}
+          templateId={template.id}
+          onSubmit={handleReviewSubmit}
+        />
+      )}
     </div>
   );
 };
