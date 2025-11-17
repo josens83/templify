@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShoppingCart,
@@ -18,17 +18,120 @@ import {
   BarChart3,
   Mail,
   Download,
+  Bell,
+  CheckCircle,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import SearchModal from '../SearchModal';
+
+interface Notification {
+  id: string;
+  type: 'sale' | 'message' | 'refund' | 'review' | 'system';
+  title: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+  link?: string;
+}
 
 const Header: React.FC = () => {
   const { cart, wishlist, user, isAuthenticated, logout, darkMode, toggleDarkMode } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
   const wishlistCount = wishlist.length;
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  useEffect(() => {
+    // Load notifications from localStorage
+    const savedNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    setNotifications(savedNotifications);
+
+    // Initialize with some sample notifications if empty
+    if (savedNotifications.length === 0 && isAuthenticated) {
+      const sampleNotifications: Notification[] = [
+        {
+          id: '1',
+          type: 'sale',
+          title: '판매 완료',
+          message: '"모던 블로그 템플릿"이 판매되었습니다!',
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+          read: false,
+          link: '/seller-dashboard'
+        },
+        {
+          id: '2',
+          type: 'message',
+          title: '새 메시지',
+          message: '고객으로부터 새 메시지가 도착했습니다.',
+          createdAt: new Date(Date.now() - 7200000).toISOString(),
+          read: false,
+          link: '/messages'
+        },
+        {
+          id: '3',
+          type: 'review',
+          title: '새 리뷰',
+          message: '템플릿에 새로운 리뷰가 작성되었습니다.',
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          read: true,
+          link: '/seller-dashboard'
+        }
+      ];
+      setNotifications(sampleNotifications);
+      localStorage.setItem('notifications', JSON.stringify(sampleNotifications));
+    }
+  }, [isAuthenticated]);
+
+  const handleMarkAsRead = (notificationId: string) => {
+    const updatedNotifications = notifications.map(n =>
+      n.id === notificationId ? { ...n, read: true } : n
+    );
+    setNotifications(updatedNotifications);
+    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+  };
+
+  const handleMarkAllAsRead = () => {
+    const updatedNotifications = notifications.map(n => ({ ...n, read: true }));
+    setNotifications(updatedNotifications);
+    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+  };
+
+  const handleClearAll = () => {
+    setNotifications([]);
+    localStorage.setItem('notifications', JSON.stringify([]));
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'sale':
+        return '💰';
+      case 'message':
+        return '💬';
+      case 'refund':
+        return '↩️';
+      case 'review':
+        return '⭐';
+      case 'system':
+        return '🔔';
+      default:
+        return '📢';
+    }
+  };
+
+  const formatNotificationTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
+
+    if (diffInMinutes < 1) return '방금 전';
+    if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}시간 전`;
+    return `${Math.floor(diffInMinutes / 1440)}일 전`;
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
@@ -97,6 +200,123 @@ const Header: React.FC = () => {
             >
               <Search className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </button>
+
+            {/* Notifications */}
+            {isAuthenticated && (
+              <div className="relative">
+                <button
+                  onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
+                  className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="알림"
+                >
+                  <Bell className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs font-bold text-white bg-indigo-600 rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Notification Panel */}
+                {notificationPanelOpen && (
+                  <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          알림
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={handleMarkAllAsRead}
+                              className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                            >
+                              모두 읽음
+                            </button>
+                          )}
+                          <button
+                            onClick={handleClearAll}
+                            className="text-xs text-gray-500 dark:text-gray-400 hover:underline"
+                          >
+                            모두 삭제
+                          </button>
+                          <button
+                            onClick={() => setNotificationPanelOpen(false)}
+                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center">
+                          <Bell className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400">
+                            알림이 없습니다
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                          {notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
+                                !notification.read ? 'bg-indigo-50 dark:bg-indigo-900/10' : ''
+                              }`}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <span className="text-2xl flex-shrink-0">
+                                  {getNotificationIcon(notification.type)}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {notification.title}
+                                      </p>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        {notification.message}
+                                      </p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                        {formatNotificationTime(notification.createdAt)}
+                                      </p>
+                                    </div>
+                                    {!notification.read && (
+                                      <button
+                                        onClick={() => handleMarkAsRead(notification.id)}
+                                        className="ml-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                                        title="읽음으로 표시"
+                                      >
+                                        <CheckCircle className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+                                  {notification.link && (
+                                    <Link
+                                      to={notification.link}
+                                      onClick={() => {
+                                        handleMarkAsRead(notification.id);
+                                        setNotificationPanelOpen(false);
+                                      }}
+                                      className="inline-block mt-2 text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                                    >
+                                      자세히 보기 →
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Wishlist */}
             <Link

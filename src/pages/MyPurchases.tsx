@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, FileText, Calendar, CreditCard, Star, ShoppingBag } from 'lucide-react';
+import { Download, FileText, Calendar, CreditCard, Star, ShoppingBag, RotateCcw, X } from 'lucide-react';
+import { useApp } from '../contexts/AppContext';
 
 interface Order {
   id: string;
@@ -19,11 +20,17 @@ interface Order {
   total: number;
   status: string;
   paymentMethod: string;
+  refundStatus?: 'none' | 'requested' | 'approved' | 'rejected';
+  refundReason?: string;
 }
 
 const MyPurchases: React.FC = () => {
+  const { showToast } = useApp();
   const [orders, setOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'downloads'>('all');
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [refundReason, setRefundReason] = useState('');
 
   useEffect(() => {
     // Load orders from localStorage
@@ -34,6 +41,60 @@ const MyPurchases: React.FC = () => {
   const handleDownload = (templateName: string) => {
     // Simulate download
     alert(`다운로드 시작: ${templateName}\n\n실제 서비스에서는 템플릿 파일이 다운로드됩니다.`);
+  };
+
+  const canRequestRefund = (orderDate: string) => {
+    const daysSincePurchase = Math.floor(
+      (Date.now() - new Date(orderDate).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return daysSincePurchase <= 30;
+  };
+
+  const handleRefundRequest = (order: Order) => {
+    if (!canRequestRefund(order.date)) {
+      showToast('error', '환불 요청 기간이 만료되었습니다. (구매일로부터 30일 이내만 가능)');
+      return;
+    }
+    if (order.refundStatus === 'requested') {
+      showToast('info', '이미 환불 요청이 진행 중입니다.');
+      return;
+    }
+    setSelectedOrder(order);
+    setRefundModalOpen(true);
+  };
+
+  const handleRefundSubmit = () => {
+    if (!refundReason.trim()) {
+      showToast('error', '환불 사유를 입력해주세요.');
+      return;
+    }
+
+    if (selectedOrder) {
+      const updatedOrders = orders.map((order) =>
+        order.id === selectedOrder.id
+          ? { ...order, refundStatus: 'requested' as const, refundReason }
+          : order
+      );
+
+      setOrders(updatedOrders);
+      localStorage.setItem('orders', JSON.stringify(updatedOrders));
+
+      // 환불 요청 저장
+      const refundRequests = JSON.parse(localStorage.getItem('refundRequests') || '[]');
+      refundRequests.push({
+        id: `REFUND-${Date.now()}`,
+        orderId: selectedOrder.id,
+        reason: refundReason,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      });
+      localStorage.setItem('refundRequests', JSON.stringify(refundRequests));
+
+      showToast('success', '환불 요청이 접수되었습니다. 영업일 기준 3일 내에 처리됩니다.');
+      setRefundModalOpen(false);
+      setRefundReason('');
+      setSelectedOrder(null);
+    }
   };
 
   const allPurchasedTemplates = orders.flatMap((order) =>
@@ -175,18 +236,114 @@ const MyPurchases: React.FC = () => {
                 </div>
 
                 <div className="border-t border-gray-200 dark:border-gray-700 mt-4 pt-4 flex justify-between items-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    총 {order.items.length}개 상품
-                  </p>
-                  <p className="text-lg font-semibold">
-                    총 결제금액:{' '}
-                    <span className="text-primary-600 dark:text-primary-400">
-                      ₩{order.total.toLocaleString()}
-                    </span>
-                  </p>
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      총 {order.items.length}개 상품
+                    </p>
+                    {order.refundStatus === 'requested' && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+                        환불 요청 중
+                      </span>
+                    )}
+                    {order.refundStatus === 'approved' && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                        환불 승인
+                      </span>
+                    )}
+                    {order.refundStatus === 'rejected' && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                        환불 거부
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {canRequestRefund(order.date) && !order.refundStatus && (
+                      <button
+                        onClick={() => handleRefundRequest(order)}
+                        className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        환불 요청
+                      </button>
+                    )}
+                    <p className="text-lg font-semibold">
+                      총 결제금액:{' '}
+                      <span className="text-primary-600 dark:text-primary-400">
+                        ₩{order.total.toLocaleString()}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Refund Modal */}
+        {refundModalOpen && selectedOrder && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  환불 요청
+                </h3>
+                <button
+                  onClick={() => {
+                    setRefundModalOpen(false);
+                    setRefundReason('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  주문번호: <span className="font-medium">{selectedOrder.id}</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  결제금액: <span className="font-medium">₩{selectedOrder.total.toLocaleString()}</span>
+                </p>
+              </div>
+
+              <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+                <p className="text-xs text-yellow-800 dark:text-yellow-300">
+                  환불 정책: 구매일로부터 30일 이내에만 환불이 가능합니다. 환불 요청은 영업일 기준 3일 내에 처리됩니다.
+                </p>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  환불 사유 <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  placeholder="환불 사유를 상세히 입력해주세요"
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleRefundSubmit}
+                  className="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                >
+                  환불 요청하기
+                </button>
+                <button
+                  onClick={() => {
+                    setRefundModalOpen(false);
+                    setRefundReason('');
+                  }}
+                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

@@ -23,6 +23,10 @@ import Pricing from './pages/Pricing';
 import FAQ from './pages/FAQ';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import Admin from './pages/Admin';
+import Support from './pages/Support';
+import SupportTickets from './pages/SupportTickets';
+import SellerRefunds from './pages/SellerRefunds';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -51,6 +55,10 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/support/tickets" element={<SupportTickets />} />
+            <Route path="/seller/refunds" element={<SellerRefunds />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="*" element={<NotFound />} />

@@ -165,10 +165,18 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
-                  to="/community"
+                  to="/support"
                   className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors"
                 >
-                  문의하기
+                  고객 지원
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/support/tickets"
+                  className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors"
+                >
+                  내 문의
                 </Link>
               </li>
               <li>
