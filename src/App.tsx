@@ -9,6 +9,8 @@ import ExpertDetail from './pages/ExpertDetail';
 import Community from './pages/Community';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import OrderComplete from './pages/OrderComplete';
+import MyPurchases from './pages/MyPurchases';
 import Dashboard from './pages/Dashboard';
 import SellerDashboard from './pages/SellerDashboard';
 import UploadTemplate from './pages/UploadTemplate';
@@ -34,6 +36,8 @@ function App() {
             <Route path="/community" element={<Community />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-complete/:orderId" element={<OrderComplete />} />
+            <Route path="/my-purchases" element={<MyPurchases />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/seller-dashboard" element={<SellerDashboard />} />
             <Route path="/upload-template" element={<UploadTemplate />} />
