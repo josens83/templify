@@ -16,6 +16,7 @@ import { templates } from '../data/templates';
 import { getReviewsByTemplateId } from '../data/reviews';
 import { useApp } from '../contexts/AppContext';
 import ReviewModal from '../components/ReviewModal';
+import SocialShare from '../components/SocialShare';
 
 const TemplateDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -172,6 +173,15 @@ const TemplateDetail: React.FC = () => {
                   <Calendar className="h-5 w-5" />
                   <span>업데이트: {template.lastUpdated}</span>
                 </div>
+              </div>
+
+              {/* Social Share */}
+              <div className="mb-6">
+                <SocialShare
+                  url={`${window.location.origin}/templates/${template.id}`}
+                  title={template.name}
+                  description={template.description}
+                />
               </div>
 
               {/* Tags */}

@@ -1,7 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CreditCard, Lock, CheckCircle, ArrowLeft, Building2 } from 'lucide-react';
+import { CreditCard, Lock, CheckCircle, ArrowLeft, Building2, Tag, Gift, Coins, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+
+interface Coupon {
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  minPurchase: number;
+  description: string;
+}
+
+type MembershipTier = 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+
+interface MembershipInfo {
+  tier: MembershipTier;
+  points: number;
+  totalSpent: number;
+  discount: number; // percentage
+}
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
@@ -9,6 +26,16 @@ const Checkout: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank' | 'kakao'>('card');
   const [agreed, setAgreed] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [pointsToUse, setPointsToUse] = useState(0);
+  const [membership, setMembership] = useState<MembershipInfo>({
+    tier: 'Bronze',
+    points: 0,
+    totalSpent: 0,
+    discount: 0
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,10 +44,45 @@ const Checkout: React.FC = () => {
     cardName: '',
     expiryDate: '',
     cvv: '',
-    billingAddress: '',
-    city: '',
-    zipCode: '',
   });
+
+  // 사용 가능한 쿠폰 목록
+  const availableCoupons: Coupon[] = [
+    { code: 'WELCOME10', type: 'percentage', value: 10, minPurchase: 30000, description: '신규 회원 10% 할인' },
+    { code: 'SAVE5000', type: 'fixed', value: 5000, minPurchase: 50000, description: '5만원 이상 구매 시 5천원 할인' },
+    { code: 'VIP20', type: 'percentage', value: 20, minPurchase: 100000, description: 'VIP 회원 20% 할인' },
+  ];
+
+  useEffect(() => {
+    // Load membership info from localStorage
+    const savedMembership = JSON.parse(localStorage.getItem('membership') || 'null');
+    if (savedMembership) {
+      setMembership(savedMembership);
+    } else {
+      // Initialize membership based on total spent
+      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      const totalSpent = orders.reduce((sum: number, order: any) => sum + order.total, 0);
+      const points = Math.floor(totalSpent * 0.05); // 5% points back
+
+      let tier: MembershipTier = 'Bronze';
+      let discount = 0;
+
+      if (totalSpent >= 500000) {
+        tier = 'Platinum';
+        discount = 15;
+      } else if (totalSpent >= 300000) {
+        tier = 'Gold';
+        discount = 10;
+      } else if (totalSpent >= 100000) {
+        tier = 'Silver';
+        discount = 5;
+      }
+
+      const membershipInfo = { tier, points, totalSpent, discount };
+      setMembership(membershipInfo);
+      localStorage.setItem('membership', JSON.stringify(membershipInfo));
+    }
+  }, []);
 
   if (!isAuthenticated) {
     return (
@@ -69,6 +131,35 @@ const Checkout: React.FC = () => {
     });
   };
 
+  const handleApplyCoupon = () => {
+    const coupon = availableCoupons.find(c => c.code === couponCode.toUpperCase());
+
+    if (!coupon) {
+      showToast('error', '유효하지 않은 쿠폰 코드입니다.');
+      return;
+    }
+
+    if (cartTotal < coupon.minPurchase) {
+      showToast('error', `이 쿠폰은 ₩${coupon.minPurchase.toLocaleString()} 이상 구매 시 사용 가능합니다.`);
+      return;
+    }
+
+    setAppliedCoupon(coupon);
+    showToast('success', '쿠폰이 적용되었습니다!');
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    showToast('info', '쿠폰이 제거되었습니다.');
+  };
+
+  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    const maxPoints = Math.min(membership.points, Math.floor(cartTotal * 0.5)); // 최대 50%까지만 포인트 사용 가능
+    setPointsToUse(Math.min(value, maxPoints));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -81,12 +172,21 @@ const Checkout: React.FC = () => {
 
     // Simulate payment processing
     setTimeout(() => {
+      // Calculate earned points (5% of final amount)
+      const earnedPoints = Math.floor(finalTotal * 0.05);
+
       // Save order to localStorage
       const order = {
         id: `ORDER-${Date.now()}`,
         date: new Date().toISOString(),
         items: cart,
-        total: Math.floor(cartTotal * 1.15),
+        subtotal: cartTotal,
+        membershipDiscount,
+        couponDiscount,
+        pointsUsed: pointsToUse,
+        platformFee,
+        total: finalTotal,
+        earnedPoints,
         status: 'completed',
         paymentMethod,
         customerInfo: {
@@ -99,6 +199,30 @@ const Checkout: React.FC = () => {
       const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
       localStorage.setItem('orders', JSON.stringify([order, ...existingOrders]));
 
+      // Update membership
+      const updatedMembership = {
+        ...membership,
+        points: membership.points - pointsToUse + earnedPoints,
+        totalSpent: membership.totalSpent + finalTotal
+      };
+
+      // Upgrade tier if needed
+      if (updatedMembership.totalSpent >= 500000 && updatedMembership.tier !== 'Platinum') {
+        updatedMembership.tier = 'Platinum';
+        updatedMembership.discount = 15;
+        showToast('success', '🎉 Platinum 등급으로 업그레이드되었습니다!');
+      } else if (updatedMembership.totalSpent >= 300000 && updatedMembership.tier === 'Silver') {
+        updatedMembership.tier = 'Gold';
+        updatedMembership.discount = 10;
+        showToast('success', '🎉 Gold 등급으로 업그레이드되었습니다!');
+      } else if (updatedMembership.totalSpent >= 100000 && updatedMembership.tier === 'Bronze') {
+        updatedMembership.tier = 'Silver';
+        updatedMembership.discount = 5;
+        showToast('success', '🎉 Silver 등급으로 업그레이드되었습니다!');
+      }
+
+      localStorage.setItem('membership', JSON.stringify(updatedMembership));
+
       // Clear cart
       clearCart();
       setProcessing(false);
@@ -108,8 +232,33 @@ const Checkout: React.FC = () => {
     }, 2000);
   };
 
-  const platformFee = Math.floor(cartTotal * 0.15);
-  const totalAmount = cartTotal + platformFee;
+  // Calculate discounts
+  const membershipDiscount = Math.floor(cartTotal * (membership.discount / 100));
+
+  let couponDiscount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === 'percentage') {
+      couponDiscount = Math.floor((cartTotal - membershipDiscount) * (appliedCoupon.value / 100));
+    } else {
+      couponDiscount = appliedCoupon.value;
+    }
+  }
+
+  const discountedTotal = cartTotal - membershipDiscount - couponDiscount - pointsToUse;
+  const platformFee = Math.floor(discountedTotal * 0.15);
+  const finalTotal = discountedTotal + platformFee;
+
+  const getMembershipIcon = (tier: MembershipTier) => {
+    const colors = {
+      Bronze: 'text-amber-700',
+      Silver: 'text-gray-400',
+      Gold: 'text-yellow-500',
+      Platinum: 'text-purple-500'
+    };
+    return <Crown className={`w-5 h-5 ${colors[tier]}`} />;
+  };
+
+  const maxPointsUsable = Math.min(membership.points, Math.floor(cartTotal * 0.5));
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
@@ -130,6 +279,31 @@ const Checkout: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Payment Form */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Membership Badge */}
+              <div className="card bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-2 border-indigo-200 dark:border-indigo-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {getMembershipIcon(membership.tier)}
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">현재 등급</p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-white">{membership.tier} 멤버</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">등급 혜택</p>
+                    <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                      {membership.discount}% 할인
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">보유 포인트</p>
+                    <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                      {membership.points.toLocaleString()}P
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Contact Information */}
               <div className="card">
                 <h2 className="text-xl font-semibold mb-4">연락처 정보</h2>
@@ -342,7 +516,7 @@ const Checkout: React.FC = () => {
                 ) : (
                   <>
                     <Lock className="inline mr-2 h-5 w-5" />
-                    ₩{totalAmount.toLocaleString()} 결제하기
+                    ₩{finalTotal.toLocaleString()} 결제하기
                   </>
                 )}
               </button>
@@ -354,7 +528,7 @@ const Checkout: React.FC = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="card sticky top-24">
+              <div className="card sticky top-24 space-y-4">
                 <h2 className="text-xl font-semibold mb-4">주문 요약</h2>
 
                 {/* Items */}
@@ -376,20 +550,144 @@ const Checkout: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2 mb-4">
+                {/* Coupon Input */}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <label className="block text-sm font-medium mb-2 flex items-center">
+                    <Tag className="w-4 h-4 mr-1" />
+                    쿠폰 코드
+                  </label>
+                  {appliedCoupon ? (
+                    <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-green-900 dark:text-green-300">
+                            {appliedCoupon.code}
+                          </p>
+                          <p className="text-xs text-green-700 dark:text-green-400">
+                            {appliedCoupon.description}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          className="text-xs text-red-600 hover:text-red-700"
+                        >
+                          제거
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="쿠폰 코드 입력"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700"
+                      >
+                        적용
+                      </button>
+                    </div>
+                  )}
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="font-medium mb-1">사용 가능한 쿠폰:</p>
+                    <ul className="space-y-1">
+                      {availableCoupons.map((coupon) => (
+                        <li key={coupon.code}>• {coupon.code} - {coupon.description}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Points Usage */}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <label className="block text-sm font-medium mb-2 flex items-center">
+                    <Coins className="w-4 h-4 mr-1" />
+                    포인트 사용 (최대 50%)
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="number"
+                      value={pointsToUse}
+                      onChange={handlePointsChange}
+                      min="0"
+                      max={maxPointsUsable}
+                      placeholder="0"
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPointsToUse(maxPointsUsable)}
+                      className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700"
+                    >
+                      전액
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    사용 가능: {maxPointsUsable.toLocaleString()}P / 보유: {membership.points.toLocaleString()}P
+                  </p>
+                </div>
+
+                {/* Price Breakdown */}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
                   <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                     <span>소계</span>
                     <span>₩{cartTotal.toLocaleString()}</span>
                   </div>
+
+                  {membership.discount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                      <span className="flex items-center">
+                        <Gift className="w-4 h-4 mr-1" />
+                        {membership.tier} 회원 할인 ({membership.discount}%)
+                      </span>
+                      <span>-₩{membershipDiscount.toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                      <span className="flex items-center">
+                        <Tag className="w-4 h-4 mr-1" />
+                        쿠폰 할인
+                      </span>
+                      <span>-₩{couponDiscount.toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {pointsToUse > 0 && (
+                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                      <span className="flex items-center">
+                        <Coins className="w-4 h-4 mr-1" />
+                        포인트 사용
+                      </span>
+                      <span>-₩{pointsToUse.toLocaleString()}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                     <span>플랫폼 수수료 (15%)</span>
-                    <span>₩{Math.floor(cartTotal * 0.15).toLocaleString()}</span>
+                    <span>₩{platformFee.toLocaleString()}</span>
                   </div>
+
                   <div className="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200 dark:border-gray-700">
                     <span>총 결제금액</span>
                     <span className="text-primary-600 dark:text-primary-400">
-                      ₩{totalAmount.toLocaleString()}
+                      ₩{finalTotal.toLocaleString()}
                     </span>
+                  </div>
+
+                  {/* Earn Points Info */}
+                  <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                    <p className="text-xs text-indigo-900 dark:text-indigo-300 flex items-center">
+                      <Gift className="w-4 h-4 mr-1" />
+                      이번 구매로 <strong className="mx-1">{Math.floor(finalTotal * 0.05).toLocaleString()}P</strong> 적립 예정
+                    </p>
                   </div>
                 </div>
 
@@ -403,7 +701,7 @@ const Checkout: React.FC = () => {
                   </ul>
                 </div>
 
-                <div className="mt-4 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
                   <Lock className="h-3 w-3 mr-1" />
                   안전한 결제
                 </div>
