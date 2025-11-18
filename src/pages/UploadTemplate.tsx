@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { setItem } from '../utils/storage';
 import {
   Upload,
   Image as ImageIcon,
@@ -148,7 +149,7 @@ const UploadTemplate: React.FC = () => {
 
   const handleSaveDraft = () => {
     // 임시 저장 로직
-    localStorage.setItem('templateDraft', JSON.stringify(formData));
+    setItem('templateDraft', formData);
     alert('임시 저장되었습니다.');
   };
 

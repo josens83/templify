@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Facebook, Twitter, Instagram, Youtube, Mail, Send } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
+import { getItem, setItem } from '../../utils/storage';
 
 const Footer: React.FC = () => {
   const { showToast } = useApp();
@@ -26,7 +27,7 @@ const Footer: React.FC = () => {
     setIsSubscribing(true);
 
     // localStorage에 구독자 저장
-    const subscribers = JSON.parse(localStorage.getItem('newsletterSubscribers') || '[]');
+    const subscribers = getItem<any[]>('newsletterSubscribers') || [];
 
     // 중복 구독 확인
     if (subscribers.includes(email)) {
@@ -39,7 +40,7 @@ const Footer: React.FC = () => {
       email,
       subscribedAt: new Date().toISOString()
     });
-    localStorage.setItem('newsletterSubscribers', JSON.stringify(subscribers));
+    setItem('newsletterSubscribers', subscribers);
 
     showToast('success', '뉴스레터 구독이 완료되었습니다! 🎉');
     setEmail('');

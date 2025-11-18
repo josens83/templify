@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { CartItem, User, Template } from '../types';
 import type { Toast } from '../components/ToastContainer';
+import { getItem, setItem, removeItem } from '../utils/storage';
 
 interface AppContextType {
   // Cart
@@ -65,32 +66,32 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    const savedWishlist = localStorage.getItem('wishlist');
-    const savedRecentlyViewed = localStorage.getItem('recentlyViewed');
-    const savedUser = localStorage.getItem('user');
-    const savedDarkMode = localStorage.getItem('darkMode');
+    const savedCart = getItem<CartItem[]>('cart');
+    const savedWishlist = getItem<string[]>('wishlist');
+    const savedRecentlyViewed = getItem<string[]>('recentlyViewed');
+    const savedUser = getItem<User>('user');
+    const savedDarkMode = getItem<boolean>('darkMode');
 
-    if (savedCart) setCart(JSON.parse(savedCart));
-    if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
-    if (savedRecentlyViewed) setRecentlyViewed(JSON.parse(savedRecentlyViewed));
-    if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedDarkMode) setDarkMode(savedDarkMode === 'true');
+    if (savedCart) setCart(savedCart);
+    if (savedWishlist) setWishlist(savedWishlist);
+    if (savedRecentlyViewed) setRecentlyViewed(savedRecentlyViewed);
+    if (savedUser) setUser(savedUser);
+    if (savedDarkMode !== null) setDarkMode(savedDarkMode);
   }, []);
 
   // Save cart to localStorage
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    setItem('cart', cart);
   }, [cart]);
 
   // Save wishlist to localStorage
   useEffect(() => {
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    setItem('wishlist', wishlist);
   }, [wishlist]);
 
   // Save recently viewed to localStorage
   useEffect(() => {
-    localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+    setItem('recentlyViewed', recentlyViewed);
   }, [recentlyViewed]);
 
   // Apply dark mode
@@ -100,7 +101,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('darkMode', darkMode.toString());
+    setItem('darkMode', darkMode);
   }, [darkMode]);
 
   const addToCart = (template: Template) => {
@@ -171,12 +172,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       createdAt: new Date().toISOString(),
     };
     setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
+    setItem('user', mockUser);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    removeItem('user');
   };
 
   const toggleDarkMode = () => {

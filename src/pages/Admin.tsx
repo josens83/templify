@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getItem } from '../utils/storage';
 import {
   BarChart3,
   Users,
@@ -67,7 +68,7 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     // 통계 데이터 로드
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const orders = getItem<any[]>('orders') || [];
     const totalRevenue = orders.reduce((sum: number, order: any) => sum + order.total, 0);
 
     const today = new Date().toDateString();

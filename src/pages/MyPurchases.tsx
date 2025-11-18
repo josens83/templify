@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, FileText, Calendar, CreditCard, Star, ShoppingBag, RotateCcw, X } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { getItem, setItem } from '../utils/storage';
 
 interface Order {
   id: string;
@@ -34,7 +35,7 @@ const MyPurchases: React.FC = () => {
 
   useEffect(() => {
     // Load orders from localStorage
-    const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const savedOrders = getItem<Order[]>('orders') || [];
     setOrders(savedOrders);
   }, []);
 
@@ -77,10 +78,10 @@ const MyPurchases: React.FC = () => {
       );
 
       setOrders(updatedOrders);
-      localStorage.setItem('orders', JSON.stringify(updatedOrders));
+      setItem('orders', updatedOrders);
 
       // 환불 요청 저장
-      const refundRequests = JSON.parse(localStorage.getItem('refundRequests') || '[]');
+      const refundRequests = getItem<any[]>('refundRequests') || [];
       refundRequests.push({
         id: `REFUND-${Date.now()}`,
         orderId: selectedOrder.id,
@@ -88,7 +89,7 @@ const MyPurchases: React.FC = () => {
         status: 'pending',
         createdAt: new Date().toISOString()
       });
-      localStorage.setItem('refundRequests', JSON.stringify(refundRequests));
+      setItem('refundRequests', refundRequests);
 
       showToast('success', '환불 요청이 접수되었습니다. 영업일 기준 3일 내에 처리됩니다.');
       setRefundModalOpen(false);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, CheckCircle, XCircle, Clock, Search } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { getItem, setItem } from '../utils/storage';
 
 interface RefundRequest {
   id: string;
@@ -31,8 +32,8 @@ const SellerRefunds: React.FC = () => {
   }, []);
 
   const loadRefundRequests = () => {
-    const requests = JSON.parse(localStorage.getItem('refundRequests') || '[]');
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const requests = getItem<RefundRequest[]>('refundRequests') || [];
+    const orders = getItem<any[]>('orders') || [];
 
     // Merge refund requests with order details
     const enrichedRequests = requests.map((request: RefundRequest) => {
@@ -57,20 +58,20 @@ const SellerRefunds: React.FC = () => {
     setRefundRequests(requests);
 
     // Update localStorage
-    const storageRequests = JSON.parse(localStorage.getItem('refundRequests') || '[]');
+    const storageRequests = getItem<RefundRequest[]>('refundRequests') || [];
     const updatedStorageRequests = storageRequests.map((req: RefundRequest) =>
       req.id === refundId ? { ...req, status: 'approved' } : req
     );
-    localStorage.setItem('refundRequests', JSON.stringify(updatedStorageRequests));
+    setItem('refundRequests', updatedStorageRequests);
 
     // Update order status
     const request = requests.find((r) => r.id === refundId);
     if (request) {
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      const orders = getItem<any[]>('orders') || [];
       const updatedOrders = orders.map((order: any) =>
         order.id === request.orderId ? { ...order, refundStatus: 'approved' } : order
       );
-      localStorage.setItem('orders', JSON.stringify(updatedOrders));
+      setItem('orders', updatedOrders);
     }
 
     showToast('success', '환불 요청이 승인되었습니다.');
@@ -83,20 +84,20 @@ const SellerRefunds: React.FC = () => {
     setRefundRequests(requests);
 
     // Update localStorage
-    const storageRequests = JSON.parse(localStorage.getItem('refundRequests') || '[]');
+    const storageRequests = getItem<RefundRequest[]>('refundRequests') || [];
     const updatedStorageRequests = storageRequests.map((req: RefundRequest) =>
       req.id === refundId ? { ...req, status: 'rejected' } : req
     );
-    localStorage.setItem('refundRequests', JSON.stringify(updatedStorageRequests));
+    setItem('refundRequests', updatedStorageRequests);
 
     // Update order status
     const request = requests.find((r) => r.id === refundId);
     if (request) {
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      const orders = getItem<any[]>('orders') || [];
       const updatedOrders = orders.map((order: any) =>
         order.id === request.orderId ? { ...order, refundStatus: 'rejected' } : order
       );
-      localStorage.setItem('orders', JSON.stringify(updatedOrders));
+      setItem('orders', updatedOrders);
     }
 
     showToast('success', '환불 요청이 거부되었습니다.');

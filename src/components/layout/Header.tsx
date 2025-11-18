@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import SearchModal from '../SearchModal';
+import { getItem, setItem } from '../../utils/storage';
 
 interface Notification {
   id: string;
@@ -47,7 +48,7 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     // Load notifications from localStorage
-    const savedNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    const savedNotifications = getItem<Notification[]>('notifications') || [];
     setNotifications(savedNotifications);
 
     // Initialize with some sample notifications if empty
@@ -82,7 +83,7 @@ const Header: React.FC = () => {
         }
       ];
       setNotifications(sampleNotifications);
-      localStorage.setItem('notifications', JSON.stringify(sampleNotifications));
+      setItem('notifications', sampleNotifications);
     }
   }, [isAuthenticated]);
 
@@ -91,18 +92,18 @@ const Header: React.FC = () => {
       n.id === notificationId ? { ...n, read: true } : n
     );
     setNotifications(updatedNotifications);
-    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    setItem('notifications', updatedNotifications);
   };
 
   const handleMarkAllAsRead = () => {
     const updatedNotifications = notifications.map(n => ({ ...n, read: true }));
     setNotifications(updatedNotifications);
-    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    setItem('notifications', updatedNotifications);
   };
 
   const handleClearAll = () => {
     setNotifications([]);
-    localStorage.setItem('notifications', JSON.stringify([]));
+    setItem('notifications', []);
   };
 
   const getNotificationIcon = (type: string) => {

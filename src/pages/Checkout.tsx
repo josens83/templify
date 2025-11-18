@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CreditCard, Lock, CheckCircle, ArrowLeft, Building2, Tag, Gift, Coins, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { getItem, setItem } from '../utils/storage';
 
 interface Coupon {
   code: string;
@@ -55,12 +56,12 @@ const Checkout: React.FC = () => {
 
   useEffect(() => {
     // Load membership info from localStorage
-    const savedMembership = JSON.parse(localStorage.getItem('membership') || 'null');
+    const savedMembership = getItem<MembershipInfo>('membership');
     if (savedMembership) {
       setMembership(savedMembership);
     } else {
       // Initialize membership based on total spent
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      const orders = getItem<any[]>('orders') || [];
       const totalSpent = orders.reduce((sum: number, order: any) => sum + order.total, 0);
       const points = Math.floor(totalSpent * 0.05); // 5% points back
 
@@ -80,7 +81,7 @@ const Checkout: React.FC = () => {
 
       const membershipInfo = { tier, points, totalSpent, discount };
       setMembership(membershipInfo);
-      localStorage.setItem('membership', JSON.stringify(membershipInfo));
+      setItem('membership', membershipInfo);
     }
   }, []);
 
@@ -196,8 +197,8 @@ const Checkout: React.FC = () => {
         },
       };
 
-      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-      localStorage.setItem('orders', JSON.stringify([order, ...existingOrders]));
+      const existingOrders = getItem<any[]>('orders') || [];
+      setItem('orders', [order, ...existingOrders]);
 
       // Update membership
       const updatedMembership = {
@@ -221,7 +222,7 @@ const Checkout: React.FC = () => {
         showToast('success', '🎉 Silver 등급으로 업그레이드되었습니다!');
       }
 
-      localStorage.setItem('membership', JSON.stringify(updatedMembership));
+      setItem('membership', updatedMembership);
 
       // Clear cart
       clearCart();

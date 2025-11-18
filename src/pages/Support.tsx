@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle, Send, AlertCircle } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { getItem, setItem } from '../utils/storage';
 
 const Support: React.FC = () => {
   const navigate = useNavigate();
@@ -48,9 +49,9 @@ const Support: React.FC = () => {
     };
 
     // localStorage에 티켓 저장
-    const tickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+    const tickets = getItem<any[]>('supportTickets') || [];
     tickets.push(ticket);
-    localStorage.setItem('supportTickets', JSON.stringify(tickets));
+    setItem('supportTickets', tickets);
 
     showToast('success', '문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.');
     navigate('/support/tickets');

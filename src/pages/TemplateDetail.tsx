@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getItem } from '../utils/storage';
 import {
   Star,
   Download,
@@ -43,7 +44,7 @@ const TemplateDetail: React.FC = () => {
   useEffect(() => {
     if (!template) return;
 
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const orders = getItem<any[]>('orders') || [];
     const purchased = orders.some((order: any) =>
       order.items.some((item: any) => item.template.id === template.id)
     );

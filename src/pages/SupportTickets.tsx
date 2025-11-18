@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle, Clock, CheckCircle, XCircle, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { getItem } from '../utils/storage';
 
 interface Ticket {
   id: string;
@@ -29,7 +30,7 @@ const SupportTickets: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
   useEffect(() => {
-    const savedTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+    const savedTickets = getItem<Ticket[]>('supportTickets') || [];
     setTickets(savedTickets);
   }, []);
 

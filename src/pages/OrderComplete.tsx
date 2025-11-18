@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, Download, FileText, ArrowRight, Home } from 'lucide-react';
+import { getItem } from '../utils/storage';
 
 interface Order {
   id: string;
@@ -32,7 +33,7 @@ const OrderComplete: React.FC = () => {
 
   useEffect(() => {
     // Load order from localStorage
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const orders = getItem<Order[]>('orders') || [];
     const foundOrder = orders.find((o: Order) => o.id === orderId);
 
     if (foundOrder) {
