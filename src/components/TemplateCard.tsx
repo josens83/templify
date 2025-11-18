@@ -32,30 +32,37 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
   };
 
   return (
-    <div className="card group hover:shadow-xl transition-all duration-300">
-      <Link to={`/templates/${template.id}`} className="block">
-        {/* Image */}
-        <div className="relative overflow-hidden rounded-lg mb-4">
-          <img
-            src={template.image}
-            alt={template.name}
-            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          {/* Wishlist Button */}
-          <button
-            onClick={handleWishlistToggle}
-            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all ${
-              isWishlisted
-                ? 'bg-red-500 text-white'
-                : 'bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 hover:bg-red-500 hover:text-white'
-            }`}
-            aria-label={isWishlisted ? '찜하기 취소' : '찜하기'}
-          >
-            <Heart
-              className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`}
+    <div className="group relative">
+      {/* Glow effect on hover */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-20 blur transition duration-300" />
+
+      <div className="relative card hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <Link to={`/templates/${template.id}`} className="block">
+          {/* Image */}
+          <div className="relative overflow-hidden rounded-xl mb-4">
+            <img
+              src={template.image}
+              alt={template.name}
+              className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
             />
-          </button>
-        </div>
+            {/* Overlay gradient on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            {/* Wishlist Button */}
+            <button
+              onClick={handleWishlistToggle}
+              className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-200 shadow-lg ${
+                isWishlisted
+                  ? 'bg-red-500 text-white scale-110'
+                  : 'bg-white/90 dark:bg-gray-800/90 text-gray-600 dark:text-gray-400 hover:bg-red-500 hover:text-white hover:scale-110'
+              }`}
+              aria-label={isWishlisted ? '찜하기 취소' : '찜하기'}
+            >
+              <Heart
+                className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`}
+              />
+            </button>
+          </div>
 
         {/* Content */}
         <div>
@@ -124,6 +131,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
           </div>
         </div>
       </Link>
+      </div>
     </div>
   );
 };

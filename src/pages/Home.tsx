@@ -47,94 +47,179 @@ const Home: React.FC = () => {
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-800 dark:to-gray-900 py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+      {/* Hero Section - Linear/Vercel Style */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white dark:bg-gray-950">
+        {/* Animated gradient orbs background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-br from-primary-400/30 to-purple-600/30 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-gradient-to-tr from-indigo-400/30 to-pink-600/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+          {/* Grid pattern overlay (subtle) */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] dark:opacity-[0.05]" style={{
+            backgroundImage: 'linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)',
+            backgroundSize: '50px 50px'
+          }} />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100/50 dark:bg-primary-900/30 border border-primary-200/50 dark:border-primary-800/50 mb-8 backdrop-blur-sm">
+              <Sparkles className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+              <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                1000+ 개발자가 선택한 플랫폼
+              </span>
+            </div>
+
+            {/* Main heading with gradient text */}
+            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
               프리미엄 템플릿으로
               <br />
-              <span className="text-primary-600 dark:text-primary-400">
+              <span className="bg-gradient-to-r from-primary-600 via-purple-600 to-pink-600 dark:from-primary-400 dark:via-purple-400 dark:to-pink-400 text-transparent bg-clip-text">
                 빠르게 시작하세요
               </span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
               전문가가 만든 고품질 웹사이트 템플릿과 맞춤 제작 서비스를 한곳에서
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+            {/* CTA Buttons with enhanced hover effects */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
               <Link
                 to="/templates"
-                className="inline-flex items-center justify-center px-8 py-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-lg"
+                className="group inline-flex items-center justify-center px-8 py-4 bg-primary-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-primary-600/30 hover:shadow-xl hover:shadow-primary-600/40 transition-all duration-200 hover:-translate-y-0.5"
               >
                 템플릿 둘러보기
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 to="/experts"
-                className="inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-lg border-2 border-primary-600"
+                className="group inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold text-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
               >
                 전문가 찾기
-                <Users className="ml-2 h-5 w-5" />
+                <Users className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
               </Link>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 mt-16">
-              <div>
-                <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+            {/* Stats with glass morphism cards */}
+            <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto">
+              <div className="glass-card text-center">
+                <div className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-primary-600 to-purple-600 text-transparent bg-clip-text mb-2">
                   {templates.length}+
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 mt-1">템플릿</div>
+                <div className="text-gray-700 dark:text-gray-300 font-medium">템플릿</div>
               </div>
-              <div>
-                <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+              <div className="glass-card text-center">
+                <div className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-indigo-600 to-pink-600 text-transparent bg-clip-text mb-2">
                   {experts.length}+
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 mt-1">전문가</div>
+                <div className="text-gray-700 dark:text-gray-300 font-medium">전문가</div>
               </div>
-              <div>
-                <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+              <div className="glass-card text-center">
+                <div className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-orange-600 to-red-600 text-transparent bg-clip-text mb-2">
                   15K+
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 mt-1">다운로드</div>
+                <div className="text-gray-700 dark:text-gray-300 font-medium">다운로드</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            왜 Templify를 선택해야 할까요?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-4">
-                <Shield className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+      {/* Features - Bento Box Style (Apple/Linear Inspired) */}
+      <section className="py-20 bg-gray-50 dark:bg-gray-950 overflow-hidden relative">
+        {/* Background gradient orb */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary-400/20 to-purple-600/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-indigo-400/20 to-pink-600/20 rounded-full blur-3xl" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              왜 Templify를 선택해야 할까요?
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              최고의 템플릿 마켓플레이스에서 당신의 프로젝트를 시작하세요
+            </p>
+          </div>
+
+          {/* Bento Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 max-w-6xl mx-auto">
+            {/* Large feature card - spans 4 columns on desktop */}
+            <div className="md:col-span-4 bento-item bg-gradient-to-br from-primary-500/10 via-purple-500/10 to-pink-500/10 dark:from-primary-500/20 dark:via-purple-500/20 dark:to-pink-500/20 min-h-[300px] flex flex-col justify-between">
+              <div>
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-500/20 dark:bg-primary-500/30 rounded-2xl mb-6">
+                  <Shield className="h-7 w-7 text-primary-600 dark:text-primary-400" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">
+                  검증된 품질
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
+                  모든 템플릿은 전문가 심사를 거쳐 엄선된 고품질 상품입니다.
+                  코드 품질, 디자인 완성도, 성능 최적화까지 꼼꼼하게 검증합니다.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">검증된 품질</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                모든 템플릿은 전문가 심사를 거쳐 엄선된 고품질 상품입니다
-              </p>
+              <div className="mt-6 flex gap-2">
+                <span className="px-3 py-1 bg-primary-500/20 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium">
+                  전문가 검수
+                </span>
+                <span className="px-3 py-1 bg-purple-500/20 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
+                  높은 품질
+                </span>
+              </div>
             </div>
-            <div className="card text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-4">
-                <Zap className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+
+            {/* Vertical card - spans 2 columns */}
+            <div className="md:col-span-2 bento-item bg-gradient-to-br from-orange-500/10 to-red-500/10 dark:from-orange-500/20 dark:to-red-500/20 min-h-[300px] flex flex-col justify-between">
+              <div>
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-500/20 dark:bg-orange-500/30 rounded-2xl mb-6">
+                  <Zap className="h-7 w-7 text-orange-600 dark:text-orange-400" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+                  빠른 구현
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  즉시 다운로드하여 프로젝트에 바로 적용할 수 있습니다
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">빠른 구현</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                즉시 다운로드하여 프로젝트에 바로 적용할 수 있습니다
-              </p>
             </div>
-            <div className="card text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-4">
-                <Users className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+
+            {/* Small card - spans 2 columns */}
+            <div className="md:col-span-2 bento-item bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-500/20 dark:bg-indigo-500/30 rounded-xl mb-4">
+                <Users className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">전문가 지원</h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                전문가 지원
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 text-sm">
                 추가 커스터마이징이 필요하면 전문가에게 맡기세요
+              </p>
+            </div>
+
+            {/* Small card with stats */}
+            <div className="md:col-span-2 bento-item bg-gradient-to-br from-green-500/10 to-emerald-500/10 dark:from-green-500/20 dark:to-emerald-500/20">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-green-500/20 dark:bg-green-500/30 rounded-xl mb-4">
+                <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                평생 업데이트
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 text-sm">
+                한 번 구매로 모든 업데이트를 무료로 받으세요
+              </p>
+            </div>
+
+            {/* Wide card - spans 2 columns */}
+            <div className="md:col-span-2 bento-item bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/20 dark:to-fuchsia-500/20">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-violet-500/20 dark:bg-violet-500/30 rounded-xl mb-4">
+                <Clock className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                30일 환불 보장
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 text-sm">
+                만족하지 못하셨다면 전액 환불해드립니다
               </p>
             </div>
           </div>
