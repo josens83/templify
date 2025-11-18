@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Download, Heart, ShoppingCart } from 'lucide-react';
-import { useApp } from '../contexts/AppContext';
+import { useCart, useToast } from '../contexts';
 import type { Template } from '../types';
 
 interface TemplateCardProps {
@@ -9,7 +9,8 @@ interface TemplateCardProps {
 }
 
 const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
-  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist, showToast } = useApp();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
+  const { showToast } = useToast();
   const isWishlisted = isInWishlist(template.id);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {

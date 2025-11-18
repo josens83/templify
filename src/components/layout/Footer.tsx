@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Facebook, Twitter, Instagram, Youtube, Mail, Send } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
+import { useToast } from '../../contexts';
 import { getItem, setItem } from '../../utils/storage';
 
 const Footer: React.FC = () => {
-  const { showToast } = useApp();
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
 

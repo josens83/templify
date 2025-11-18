@@ -21,7 +21,7 @@ import {
   Bell,
   CheckCircle,
 } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
+import { useAuth, useCart, useTheme } from '../../contexts';
 import SearchModal from '../SearchModal';
 import { getItem, setItem } from '../../utils/storage';
 
@@ -36,7 +36,11 @@ interface Notification {
 }
 
 const Header: React.FC = () => {
-  const { cart, wishlist, user, isAuthenticated, logout, darkMode, toggleDarkMode } = useApp();
+  // Use individual contexts
+  const { user, isAuthenticated, logout } = useAuth();
+  const { cart, wishlist } = useCart();
+  const { darkMode, toggleDarkMode } = useTheme();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);

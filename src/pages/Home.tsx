@@ -15,10 +15,10 @@ import {
 import { templates } from '../data/templates';
 import { experts } from '../data/experts';
 import TemplateCard from '../components/TemplateCard';
-import { useApp } from '../contexts/AppContext';
+import { useCart } from '../contexts';
 
 const Home: React.FC = () => {
-  const { recentlyViewed } = useApp();
+  const { recentlyViewed } = useCart();
   const featuredTemplates = templates.slice(0, 6);
   const topExperts = experts.slice(0, 4);
 

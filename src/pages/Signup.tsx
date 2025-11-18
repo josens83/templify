@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../contexts';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useApp();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',

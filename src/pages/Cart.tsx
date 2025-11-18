@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
-import { useApp } from '../contexts/AppContext';
+import { useCart } from '../contexts';
 
 const Cart: React.FC = () => {
-  const { cart, removeFromCart, cartTotal, clearCart } = useApp();
+  const { cart, removeFromCart, cartTotal, clearCart } = useCart();
 
   if (cart.length === 0) {
     return (

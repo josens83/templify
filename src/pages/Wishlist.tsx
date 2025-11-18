@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, Star, Download } from 'lucide-react';
-import { useApp } from '../contexts/AppContext';
+import { useCart, useToast } from '../contexts';
 import { templates } from '../data/templates';
 
 const Wishlist: React.FC = () => {
-  const { wishlist, removeFromWishlist, addToCart, showToast } = useApp();
+  const { wishlist, removeFromWishlist, addToCart } = useCart();
+  const { showToast } = useToast();
 
   const wishlistTemplates = templates.filter((template) =>
     wishlist.includes(template.id)
